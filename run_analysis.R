@@ -9,8 +9,8 @@ dataset_path = "UCI HAR Dataset"
 dir.create(file.path(dataset_path))
 unzip(zipfile = file_name)
 headers <- readLines(file.path(dataset_path, "features.txt"))
-y_header = "y"
-subj_header = "subject"
+header_y = "y"
+header_subj = "subject"
 
 X_train <-
   read.table(file.path(dataset_path, "train", "X_train.txt"),
@@ -21,17 +21,17 @@ X_test <-
 
 y_train <-
   read.table(file.path(dataset_path, "train", "y_train.txt"),
-             col.names = y_header)
+             col.names = header_y)
 y_test <-
   read.table(file.path(dataset_path, "test", "y_test.txt"),
-             col.names = y_header)
+             col.names = header_y)
 
 subj_train <-
   read.table(file.path(dataset_path, "train", "subject_train.txt"),
-             col.names = subj_header)
+             col.names = header_subj)
 subj_test <-
   read.table(file.path(dataset_path, "test", "subject_test.txt"),
-             col.names = subj_header)
+             col.names = header_subj)
 
 activity_labels <-
   read.table(file.path(dataset_path, "activity_labels.txt"))
@@ -50,16 +50,16 @@ subj <- rbind(subj_train, subj_test)
 # all all of them in one data
 data <- cbind(subj, y, X)
 # remote unnecessary data
-rm(list=ls(pattern = "X"))
-rm(list=ls(pattern = "y"))
-rm(list=ls(pattern = "subj"))
+rm(list=ls(pattern = "^X"))
+rm(list=ls(pattern = "^y"))
+rm(list=ls(pattern = "^subj"))
 
 # 2. Extracts only the measurements on the mean and standard deviation
 #    for each measurement.
 # select only the column with mean and std in them
 selected_headres <- headers[grep("mean|std", headers)]
 
-selected_headres <- c(subj_header, y_header, selected_headres)
+selected_headres <- c(header_subj, header_y, selected_headres)
 data <- data[, selected_headres]
 
 # 3. Uses descriptive activity names to name the activities in the data set
@@ -89,4 +89,4 @@ colnames(data) <- n
 # 5. From the data set in step 4, creates a second, independent tidy data set
 #    with the average of each variable for each activity and each subject.
 summarized_data <- data %>% group_by(subject, y) %>%summarise_all(mean)
-write.table(summarized_data, file = "summarized_data.txt")
+write.table(summarized_data, file = "summarized_data.txt", row.name=FALSE)
